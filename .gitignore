@@ -1,2 +1,10 @@
-.gitignore
-workplace.xml
+# Build Maven
+target/
+
+# IDE
+.idea/
+*.iml
+
+# Supports de cours (non livres)
+respect.md
+sujet.md
