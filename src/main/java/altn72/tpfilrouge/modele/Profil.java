@@ -7,6 +7,17 @@ package altn72.tpfilrouge.modele;
  * le journal (§5.6) et appliquée côté serveur (RG11).
  */
 public enum Profil {
-    RESPONSABLE_EXPLOITATION,
-    AGENT
+    RESPONSABLE_EXPLOITATION("Responsable d'exploitation"),
+    AGENT("Agent");
+
+    private final String libelle;
+
+    Profil(String libelle) {
+        this.libelle = libelle;
+    }
+
+    /** Libellé lisible affiché dans l'interface. */
+    public String getLibelle() {
+        return libelle;
+    }
 }
