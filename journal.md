@@ -8,6 +8,9 @@
 - **Configuration** : identifiants de la base lus dans les variables d'environnement `DB_USER` (défaut `root`) et `DB_PASSWORD` (défaut vide). Aucun secret n'est versionné.
 - **Initialiser la base** : exécuter `db/create.sql` (crée `Base_ALTN72`, le schéma et les données de démonstration).
 - **Lancer** : `./mvnw spring-boot:run`, puis ouvrir `http://localhost:8080`.
+- **Comptes de test** (mot de passe : `password`) :
+  - `resp` : Florian, Responsable d'exploitation.
+  - `agent` : Alexandre, Agent.
 - **Données de démonstration** : trois stations, six équipements de types variés, incidents non affectés ouverts depuis 10 h, 47 h, 48 h, 72 h et 100 h (bornes de RG3), un incident affecté, deux incidents résolus et une évaluation. Les dates sont calculées par rapport à l'heure d'exécution du script.
 
 ## ARCHITECTURE
@@ -16,7 +19,7 @@
 
 ## CHOIX TECHNIQUES
 
-- **Droits par profil** :
+- **Droits par profil** (appliqués côté serveur dans `ConfigurationSecurite`) :
 
   | N° | Fonctionnalité | Responsable d'exploitation | Agent |
   | --- | --- | --- | --- |
