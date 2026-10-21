@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Erreur')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="container">
+    <div class="alert alert-danger" role="alert">
+        <h1 class="h4">Une erreur est survenue</h1>
+        <!-- Message métier transmis par un gestionnaire d'erreurs, sinon message générique selon le code (§7.4). -->
+        <p th:if="${message != null}" th:text="${message}">Message d'erreur.</p>
+        <p th:unless="${message != null}" th:switch="${status}">
+            <span th:case="400">La requête est invalide.</span>
+            <span th:case="404">La page demandée n'existe pas.</span>
+            <span th:case="*">Une erreur inattendue est survenue. Réessayez plus tard.</span>
+        </p>
+    </div>
+    <a class="btn btn-secondary" th:href="@{/stations}">Retour aux stations</a>
+</main>
+</body>
+</html>

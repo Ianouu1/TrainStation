@@ -54,6 +54,8 @@ public class ConfigurationSecurite {
                         .logoutUrl("/deconnexion")
                         .logoutSuccessUrl("/connexion?deconnecte")
                         .permitAll())
+                // Accès refusé (profil insuffisant) : page lisible plutôt qu'erreur technique (RG11, §7.4).
+                .exceptionHandling(ex -> ex.accessDeniedPage("/acces-refuse"))
                 // L'API REST est sans état : la protection CSRF (utile aux formulaires) y est désactivée.
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"));
         return http.build();
