@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Historique')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="container">
+    <h1 class="h3 mb-4">Historique des incidents résolus</h1>
+    <table class="table table-striped table-bordered align-middle">
+        <thead>
+        <tr>
+            <th>Résolu le</th>
+            <th>Ouvert le</th>
+            <th>Équipement</th>
+            <th>Prestataire</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="incident : ${incidents}">
+            <td th:text="${#temporals.format(incident.dateResolution, 'dd/MM/yyyy HH:mm')}">date</td>
+            <td th:text="${#temporals.format(incident.dateOuverture, 'dd/MM/yyyy HH:mm')}">date</td>
+            <td th:text="${incident.equipement.libelle}">équipement</td>
+            <td th:text="${incident.prestataire != null ? incident.prestataire.nom : 'Aucun'}">prestataire</td>
+            <td>
+                <a class="btn btn-info btn-sm"
+                   th:href="@{/incidents/{id}(id=${incident.idIncident})}">Détail</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <p th:if="${incidents.isEmpty()}" class="text-muted">Aucun incident résolu.</p>
+</main>
+</body>
+</html>
