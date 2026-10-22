@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Déclarer un incident')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="container" style="max-width: 640px;">
+    <h1 class="h3 mb-3">Déclarer un incident</h1>
+    <p class="text-muted">Équipement : <span th:text="${equipement.libelle}">libellé</span>
+        (<span th:text="${equipement.reference}">REF</span>)</p>
+
+    <form th:action="@{/equipements/{id}/incidents(id=${equipement.idEquipement})}"
+          method="post" th:object="${descriptionIncidentForm}">
+        <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea id="description" th:field="*{description}" class="form-control" rows="4"></textarea>
+            <div class="text-danger small" th:if="${#fields.hasErrors('description')}"
+                 th:errors="*{description}">Erreur</div>
+        </div>
+        <button type="submit" class="btn btn-primary">Déclarer</button>
+        <a class="btn btn-secondary" th:href="@{/equipements/{id}(id=${equipement.idEquipement})}">Annuler</a>
+    </form>
+</main>
+</body>
+</html>

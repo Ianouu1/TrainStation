@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Stations')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="container">
+    <h1 class="h3 mb-4">Stations</h1>
+    <div class="list-group">
+        <a th:each="station : ${stations}"
+           th:href="@{/stations/{id}(id=${station.idStation})}"
+           class="list-group-item list-group-item-action"
+           th:text="${station.nom}">Nom de la station</a>
+    </div>
+    <p th:if="${stations.isEmpty()}" class="text-muted">Aucune station.</p>
+</main>
+</body>
+</html>
