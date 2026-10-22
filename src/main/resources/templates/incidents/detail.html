@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Détail incident')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="container">
+    <h1 class="h3 mb-3">Incident n° <span th:text="${incident.idIncident}">0</span></h1>
+
+    <dl class="row">
+        <dt class="col-sm-3">Statut</dt>
+        <dd class="col-sm-9" th:text="${incident.statut}">statut</dd>
+        <dt class="col-sm-3">Équipement</dt>
+        <dd class="col-sm-9">
+            <a th:href="@{/equipements/{id}(id=${incident.equipement.idEquipement})}"
+               th:text="${incident.equipement.libelle}">équipement</a>
+        </dd>
+        <dt class="col-sm-3">Station</dt>
+        <dd class="col-sm-9" th:text="${incident.equipement.station.nom}">station</dd>
+        <dt class="col-sm-3">Ouverture</dt>
+        <dd class="col-sm-9">
+            <span th:text="${#temporals.format(incident.dateOuverture, 'dd/MM/yyyy HH:mm')}">date</span>
+            (depuis <span th:text="${dureeOuvertureEnHeures}">0</span> h)
+        </dd>
+        <dt class="col-sm-3">Prestataire</dt>
+        <dd class="col-sm-9" th:text="${incident.prestataire != null ? incident.prestataire.nom : 'Aucun'}">-</dd>
+        <dt class="col-sm-3" th:if="${incident.dateResolution != null}">Résolution</dt>
+        <dd class="col-sm-9" th:if="${incident.dateResolution != null}"
+            th:text="${#temporals.format(incident.dateResolution, 'dd/MM/yyyy HH:mm')}">date</dd>
+    </dl>
+
+    <h2 class="h5 mt-4">Description</h2>
+    <p th:text="${incident.description}">description</p>
+
+    <!-- Évaluation existante -->
+    <div th:if="${evaluation != null}" class="alert alert-info">
+        Évaluation : <strong th:text="${evaluation.note}">0</strong>/5
+        <br><span th:text="${evaluation.commentaire}">commentaire</span>
+    </div>
+
+    <!-- Actions réservées au responsable d'exploitation (restriction aussi côté serveur, RG11) -->
+    <div th:if="${estResponsable}" class="mt-4">
+        <div class="row g-4">
+            <!-- F6 : modifier la description -->
+            <div class="col-md-6" th:if="${incident.statut.name() != 'RESOLU'}">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="h6">Modifier la description (F6)</h3>
+                        <form th:action="@{/incidents/{id}/description(id=${incident.idIncident})}" method="post"
+                              th:object="${descriptionIncidentForm}">
+                            <textarea th:field="*{description}" class="form-control mb-2" rows="3"
+                                      th:classappend="${#fields.hasErrors('description')} ? 'is-invalid'"></textarea>
+                            <div class="invalid-feedback mb-2" th:if="${#fields.hasErrors('description')}"
+                                 th:errors="*{description}">Erreur</div>
+                            <button class="btn btn-outline-primary btn-sm" type="submit">Enregistrer</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <!-- F7 : affecter / réaffecter un prestataire -->
+            <div class="col-md-6" th:if="${incident.statut.name() != 'RESOLU'}">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="h6">Affecter un prestataire (F7)</h3>
+                        <form th:action="@{/incidents/{id}/affectation(id=${incident.idIncident})}" method="post">
+                            <select name="idPrestataire" class="form-select mb-2" required>
+                                <option th:each="p : ${prestataires}" th:value="${p.idPrestataire}"
+                                        th:text="${p.nom}">prestataire</option>
+                            </select>
+                            <button class="btn btn-outline-primary btn-sm" type="submit">Affecter</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <!-- F8 : résoudre -->
+            <div class="col-md-6" th:if="${incident.statut.name() != 'RESOLU'}">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="h6">Déclarer résolu (F8)</h3>
+                        <form th:action="@{/incidents/{id}/resolution(id=${incident.idIncident})}" method="post">
+                            <button class="btn btn-success btn-sm" type="submit">Marquer comme résolu</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <!-- F10 : évaluer (incident résolu + affecté + pas encore évalué) -->
+            <div class="col-md-6"
+                 th:if="${incident.statut.name() == 'RESOLU' and incident.prestataire != null and evaluation == null}">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="h6">Évaluer le prestataire (F10)</h3>
+                        <a class="btn btn-outline-primary btn-sm"
+                           th:href="@{/incidents/{id}/evaluation(id=${incident.idIncident})}">Saisir une évaluation</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>
