@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Équipements')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="container">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/stations}">Stations</a></li>
+            <li class="breadcrumb-item active" th:text="${station.nom}">Station</li>
+        </ol>
+    </nav>
+    <h1 class="h3 mb-4">Équipements de la station <span th:text="${station.nom}">Station</span></h1>
+    <table class="table table-striped table-bordered align-middle">
+        <thead>
+        <tr>
+            <th>Référence</th>
+            <th>Libellé</th>
+            <th>Type</th>
+            <th>État</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="equipement : ${equipements}">
+            <td th:text="${equipement.reference}">REF</td>
+            <td th:text="${equipement.libelle}">Libellé</td>
+            <td th:text="${equipement.type}">Type</td>
+            <td th:text="${equipement.etat}">État</td>
+            <td>
+                <a class="btn btn-info btn-sm"
+                   th:href="@{/equipements/{id}(id=${equipement.idEquipement})}">Fiche</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <p th:if="${equipements.isEmpty()}" class="text-muted">Aucun équipement dans cette station.</p>
+</main>
+</body>
+</html>
