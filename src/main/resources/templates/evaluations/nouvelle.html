@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Évaluer un prestataire')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="container" style="max-width: 640px;">
+    <h1 class="h3 mb-3">Évaluer l'intervention</h1>
+    <p class="text-muted">
+        Incident n° <span th:text="${incident.idIncident}">0</span>
+        <br>Prestataire : <span th:text="${incident.prestataire != null ? incident.prestataire.nom : ''}">prestataire</span>
+    </p>
+
+    <form th:action="@{/incidents/{id}/evaluation(id=${incident.idIncident})}"
+          method="post" th:object="${evaluationForm}">
+        <div class="mb-3">
+            <label for="note" class="form-label">Note (1 à 5)</label>
+            <input type="number" id="note" th:field="*{note}" class="form-control" min="1" max="5">
+            <div class="text-danger small" th:if="${#fields.hasErrors('note')}" th:errors="*{note}">Erreur</div>
+        </div>
+        <div class="mb-3">
+            <label for="commentaire" class="form-label">Commentaire (facultatif)</label>
+            <textarea id="commentaire" th:field="*{commentaire}" class="form-control" rows="3"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Enregistrer l'évaluation</button>
+        <a class="btn btn-secondary" th:href="@{/incidents/{id}(id=${incident.idIncident})}">Annuler</a>
+    </form>
+</main>
+</body>
+</html>
