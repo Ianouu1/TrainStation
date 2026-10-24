@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Prestataires')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="container">
+    <h1 class="h3 mb-4">Prestataires</h1>
+    <table class="table table-striped table-bordered align-middle">
+        <thead>
+        <tr>
+            <th>Nom</th>
+            <th>Contact</th>
+            <th>Note moyenne</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="ligne : ${prestataires}">
+            <td th:text="${ligne.prestataire.nom}">nom</td>
+            <td th:text="${ligne.prestataire.contact}">contact</td>
+            <td th:text="${ligne.noteMoyenne.isPresent()
+                    ? #numbers.formatDecimal(ligne.noteMoyenne.get(), 1, 1) + ' / 5' : 'Non évalué'}">-</td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+</body>
+</html>
