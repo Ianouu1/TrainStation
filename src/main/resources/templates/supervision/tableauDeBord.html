@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Supervision')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="container">
+    <h1 class="h3 mb-4">Tableau de bord des incidents actifs</h1>
+
+    <div class="row g-3 mb-4">
+        <div class="col"><div class="card text-center"><div class="card-body">
+            <div class="h4 mb-0" th:text="${indicateurs.totalActifs}">0</div><small class="text-muted">Actifs</small>
+        </div></div></div>
+        <div class="col"><div class="card text-center border-success"><div class="card-body">
+            <div class="h4 mb-0 text-success" th:text="${indicateurs.verts}">0</div><small class="text-muted">Vert</small>
+        </div></div></div>
+        <div class="col"><div class="card text-center border-warning"><div class="card-body">
+            <div class="h4 mb-0 text-warning" th:text="${indicateurs.oranges}">0</div><small class="text-muted">Orange</small>
+        </div></div></div>
+        <div class="col"><div class="card text-center border-danger"><div class="card-body">
+            <div class="h4 mb-0 text-danger" th:text="${indicateurs.rouges}">0</div><small class="text-muted">Rouge</small>
+        </div></div></div>
+        <div class="col"><div class="card text-center border-primary"><div class="card-body">
+            <div class="h4 mb-0 text-primary" th:text="${indicateurs.affectes}">0</div><small class="text-muted">Affectés</small>
+        </div></div></div>
+    </div>
+
+    <table class="table table-bordered align-middle">
+        <thead>
+        <tr>
+            <th>Attention</th>
+            <th>Ouvert le</th>
+            <th>Station</th>
+            <th>Équipement</th>
+            <th>Description</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="ligne : ${lignes}">
+            <td>
+                <span th:if="${ligne.estAffecte()}" class="badge bg-primary">Affecté</span>
+                <span th:unless="${ligne.estAffecte()}"
+                      th:classappend="${ligne.niveauUrgence().name() == 'VERT'} ? 'bg-success' :
+                                      (${ligne.niveauUrgence().name() == 'ORANGE'} ? 'bg-warning text-dark' : 'bg-danger')"
+                      class="badge" th:text="${ligne.niveauUrgence()}">niveau</span>
+            </td>
+            <td th:text="${#temporals.format(ligne.incident().dateOuverture, 'dd/MM/yyyy HH:mm')}">date</td>
+            <td th:text="${ligne.incident().equipement.station.nom}">station</td>
+            <td th:text="${ligne.incident().equipement.libelle}">équipement</td>
+            <td th:text="${ligne.incident().description}">description</td>
+            <td>
+                <a class="btn btn-info btn-sm"
+                   th:href="@{/incidents/{id}(id=${ligne.incident().idIncident})}">Détail</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <p th:if="${lignes.isEmpty()}" class="text-muted">Aucun incident actif.</p>
+</main>
+</body>
+</html>
