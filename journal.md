@@ -7,7 +7,7 @@
 - **Prérequis** : Java 21, Maven (wrapper `./mvnw` fourni), MariaDB.
 - **Configuration** : identifiants de la base lus dans les variables d'environnement `DB_USER` (défaut `root`) et `DB_PASSWORD` (défaut vide). Aucun secret n'est versionné.
 - **Initialiser la base** : exécuter `db/create.sql` (crée `Base_ALTN72`, le schéma et les données de démonstration).
-- **Lancer** : `./mvnw spring-boot:run`, puis ouvrir `http://localhost:8080`.
+- **Lancer** : `./mvnw spring-boot:run`, puis ouvrir `http://localhost:8080`. Documentation de l'API : `http://localhost:8080/swagger-ui.html`.
 - **Comptes de test** (mot de passe : `password`) :
   - `resp` : Florian, Responsable d'exploitation.
   - `agent` : Alexandre, Agent.
@@ -33,12 +33,12 @@
   | F11 | Tableau de bord | Accès complet | Interdit |
 
   Seul le responsable peut modifier un incident (F6), et uniquement sa description : l'équipement et la date d'ouverture restent figés pour garder un historique fiable.
-- **Exceptions** : choix de `@ControllerAdvice` plutôt que `ResponseStatusException`. La traduction des erreurs en réponse est centralisée, et les services ne lèvent que des exceptions métier en français, toutes dérivées d'`ExceptionMetier`, sans dépendre de HTTP.
+- **Exceptions** : `@ControllerAdvice` (pages web) et `@RestControllerAdvice` (API) plutôt que `ResponseStatusException`. La traduction des erreurs est centralisée, et les services ne lèvent que des exceptions métier en français, toutes dérivées d'`ExceptionMetier`, sans dépendre de HTTP. Une ressource inexistante donne un 404, une transition d'état interdite un 409. Les gestionnaires journalisent l'erreur (SLF4J) là où elle est traitée, et nulle part ailleurs. Une saisie invalide est rejetée dès l'entrée (Bean Validation) et réaffiche le formulaire avec son message ; une adresse invalide donne un 400. Les pages affichent un message lisible, sans trace technique ; une erreur imprévue n'affiche qu'un message générique. `ResponseEntity` n'est utilisé que dans l'API, pour choisir le code de statut.
 - **SOLID** :
   - **S** (appliqué) : `EvaluateurUrgence` ne fait que calculer l'indicateur. Les seuils de 48 h et 72 h ne changent donc qu'à un seul endroit.
   - **D** (appliqué) : injection par constructeur avec attributs `final`, et dépendance à une `Clock` injectée plutôt qu'à `LocalDateTime.now()`. Les tests figent l'horloge pour vérifier les seuils à l'heure près.
 - **Requête SQL native** : `IncidentRepository.compterIncidentsActifsParStation()` compte les incidents actifs par station. Elle reste lisible pour une agrégation sur trois tables, mais elle dépend des noms de colonnes et du dialecte SQL, n'est pas vérifiée au démarrage et renvoie un `Object[]` non typé. Une requête JPQL avec projection serait plus sûre à maintenir.
-- **@Transactional** : sur les méthodes de service qui écrivent (`declarerIncident`, `affecterPrestataire`, `resoudreIncident`, `modifierDescription`, `evaluer`), pour qu'une exception métier annule toute l'opération (RG10).
+- **@Transactional** : sur les méthodes de service qui écrivent (`declarerIncident`, `affecterPrestataire`, `resoudreIncident`, `modifierDescription`, `evaluer`), pour qu'une exception métier annule toute l'opération (RG10). Dans `ApiIncidentService`, pour garder la session ouverte pendant la conversion des entités en DTO : en `readOnly = true` pour la consultation, en écriture pour résoudre et affecter.
 
 ## LOT ALPHA
 

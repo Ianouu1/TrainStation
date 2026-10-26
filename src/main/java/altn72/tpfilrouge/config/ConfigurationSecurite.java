@@ -43,6 +43,10 @@ public class ConfigurationSecurite {
                                 "/incidents/*/description",
                                 "/incidents/*/evaluation").hasRole(RESPONSABLE)
                         .requestMatchers(HttpMethod.GET, "/incidents/*/evaluation").hasRole(RESPONSABLE)
+                        // API REST : modifications d'état réservées au responsable d'exploitation (RG11).
+                        .requestMatchers(HttpMethod.POST,
+                                "/api/incidents/*/resolution",
+                                "/api/incidents/*/affectation").hasRole(RESPONSABLE)
                         // Tout le reste exige une session authentifiée.
                         .anyRequest().authenticated())
                 .formLogin(form -> form
