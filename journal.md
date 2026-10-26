@@ -7,7 +7,7 @@
 - **Prérequis** : Java 21, Maven (wrapper `./mvnw` fourni), MariaDB.
 - **Configuration** : identifiants de la base lus dans les variables d'environnement `DB_USER` (défaut `root`) et `DB_PASSWORD` (défaut vide). Aucun secret n'est versionné.
 - **Initialiser la base** : exécuter `db/create.sql` (crée `Base_ALTN72`, le schéma et les données de démonstration).
-- **Lancer** : `./mvnw spring-boot:run`, puis ouvrir `http://localhost:8080`.
+- **Lancer** : `./mvnw spring-boot:run`, puis ouvrir `http://localhost:8080`. Documentation de l'API : `http://localhost:8080/swagger-ui.html`.
 - **Comptes de test** (mot de passe : `password`) :
   - `resp` : Florian, Responsable d'exploitation.
   - `agent` : Alexandre, Agent.
