@@ -4,7 +4,43 @@
 <body>
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
 <main class="container">
-    <h1 class="h3 mb-4">Tableau de bord des incidents actifs</h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Tableau de bord des incidents actifs</h1>
+        <a class="btn btn-outline-secondary" th:href="@{/supervision/statistiques}">Statistiques</a>
+    </div>
+
+    <!-- Filtres combinables et tri (lot alpha, supervision avancée) -->
+    <form class="row g-2 align-items-end mb-4" method="get" th:action="@{/supervision}">
+        <div class="col-auto">
+            <label class="form-label small mb-0" for="idStation">Station</label>
+            <select id="idStation" name="idStation" class="form-select form-select-sm">
+                <option value="">Toutes</option>
+                <option th:each="s : ${stations}" th:value="${s.idStation}" th:text="${s.nom}"
+                        th:selected="${critere.idStation() != null and critere.idStation() == s.idStation}">station</option>
+            </select>
+        </div>
+        <div class="col-auto">
+            <label class="form-label small mb-0" for="niveau">Attention</label>
+            <select id="niveau" name="niveau" class="form-select form-select-sm">
+                <option value="" th:selected="${!critere.aUnFiltreDeNiveau()}">Tous</option>
+                <option value="ROUGE" th:selected="${'ROUGE'.equals(critere.niveau())}">Rouge</option>
+                <option value="ORANGE" th:selected="${'ORANGE'.equals(critere.niveau())}">Orange</option>
+                <option value="VERT" th:selected="${'VERT'.equals(critere.niveau())}">Vert</option>
+                <option value="AFFECTE" th:selected="${'AFFECTE'.equals(critere.niveau())}">Affecté</option>
+            </select>
+        </div>
+        <div class="col-auto">
+            <label class="form-label small mb-0" for="tri">Tri</label>
+            <select id="tri" name="tri" class="form-select form-select-sm">
+                <option value="URGENCE" th:selected="${!critere.estTrieParAnciennete()}">Par urgence</option>
+                <option value="ANCIENNETE" th:selected="${critere.estTrieParAnciennete()}">Par ancienneté</option>
+            </select>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary btn-sm">Filtrer</button>
+            <a class="btn btn-link btn-sm" th:href="@{/supervision}">Réinitialiser</a>
+        </div>
+    </form>
 
     <div class="row g-3 mb-4">
         <div class="col"><div class="card text-center"><div class="card-body">

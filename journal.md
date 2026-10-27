@@ -44,6 +44,10 @@
 
 ### Fonctionnalité transverse 1 : Supervision avancée
 - **Objectif** : filtrer et trier le tableau de bord pour repérer rapidement les incidents prioritaires.
+- **Progression** : réalisée après le tableau de bord (F11), en réutilisant ses lignes et son calcul d'urgence.
+- **Essais** : le filtrage par niveau d'attention ne peut pas se faire en base, puisque l'indicateur est calculé à partir de l'heure courante et n'est pas enregistré (RG4). Il est donc appliqué en mémoire, après le calcul.
+- **Résultat** : filtres combinables par station et par niveau (vert, orange, rouge, affecté), tri par urgence ou par ancienneté. Les critères restent affichés après filtrage.
+- **Limites** : filtrage en mémoire, adapté au volume d'un réseau mais pas à un très grand nombre d'incidents.
 
 ### Fonctionnalité transverse 2 : Visualisation des données
 - **Objectif** : donner au responsable une vue synthétique de la situation.
