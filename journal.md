@@ -5,14 +5,15 @@
 ## README
 
 - **Prérequis** : Java 21, Maven (wrapper `./mvnw` fourni), MariaDB.
-- **Configuration** : identifiants de la base lus dans les variables d'environnement `DB_USER` (défaut `root`) et `DB_PASSWORD` (défaut vide). Aucun secret n'est versionné.
+- **Configuration** : base lue dans les variables d'environnement `DB_URL` (défaut `jdbc:mariadb://localhost:3306/Base_ALTN72`), `DB_USER` (défaut `root`) et `DB_PASSWORD` (défaut vide). Aucun secret n'est versionné.
 - **Initialiser la base** : exécuter `db/create.sql` (crée `Base_ALTN72`, le schéma et les données de démonstration).
 - **Lancer** : `./mvnw spring-boot:run`, puis ouvrir `http://localhost:8080`. Documentation de l'API : `http://localhost:8080/swagger-ui.html`.
+- **Application déployée** : https://trainstation-vmfz.onrender.com (application sur Render à partir du `Dockerfile`, base MySQL sur Aiven).
 - **Comptes de test** (mot de passe : `password`) :
   - `resp` : Florian, Responsable d'exploitation.
   - `agent` : Alexandre, Agent.
 - **Données de démonstration** : trois stations, six équipements de types variés, incidents non affectés ouverts depuis 10 h, 47 h, 48 h, 72 h et 100 h (bornes de RG3), un incident affecté, deux incidents résolus et une évaluation. Les dates sont calculées par rapport à l'heure d'exécution du script.
-- **Limites connues** : application non déployée.
+- **Limites connues** : hébergement gratuit. L'application se met en veille après 15 min sans visite, et le premier chargement prend alors environ une minute. La base Aiven s'éteint après une longue période d'inactivité et doit alors être rallumée depuis sa console.
 
 ## ARCHITECTURE
 
@@ -88,9 +89,9 @@ Correspondance avec les packages : couche web dans `controleur` (pages) et `api`
 
 - **Contribution de chacun** :
   - Alexandre GINISTY : entités Station et Équipement, repositories (requêtes dérivées, JPQL, native), script de base de données, exceptions métier, services du cycle de vie des incidents, de l'évaluation et de la supervision, connexion, mise en page commune et gestion des erreurs web, détail d'un incident, tableau de bord, API REST, visualisation (lot alpha 2), tests d'intégration et de validation.
-  - Florian DE SOUSA : nettoyage et configuration du projet, entités Incident, Prestataire, Évaluation et Utilisateur, calcul de l'indicateur d'urgence, services de consultation, sécurité (Spring Security, bcrypt, droits), pages stations, équipements, déclaration et évaluation, configuration Swagger, supervision avancée (lot alpha 1), tests unitaires des services.
+  - Florian DE SOUSA : nettoyage et configuration du projet, entités Incident, Prestataire, Évaluation et Utilisateur, calcul de l'indicateur d'urgence, services de consultation, sécurité (Spring Security, bcrypt, droits), pages stations, équipements, déclaration et évaluation, configuration Swagger, supervision avancée (lot alpha 1), tests unitaires des services, déploiement (Render, Aiven).
 - **Plus grande difficulté** : les pages Thymeleaf affichent des associations chargées à la demande (station d'un équipement, prestataire d'un incident), ce qui provoquait des `LazyInitializationException` au rendu. Nous avons réactivé `open-in-view` pour garder la session ouverte pendant l'affichage, et utilisé des transactions en lecture seule pour l'API.
-- **Fonctionnalités non réalisées** : déploiement de l'application, faute d'hébergement choisi à ce stade.
+- **Fonctionnalités non réalisées** : aucune. Le socle (F1 à F12) et les deux fonctionnalités du lot alpha sont réalisés.
 - **Trois points à retenir** :
   1. Séparer contrôleur, service et repository rend chaque règle facile à trouver et à tester.
   2. Injecter l'horloge permet de tester des règles qui dépendent du temps.
