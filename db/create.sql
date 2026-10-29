@@ -109,5 +109,5 @@ INSERT INTO evaluation (id_incident, note, commentaire, date_evaluation) VALUES
 -- Utilisateurs : mots de passe bcrypt (jamais en clair). Comptes de test -> journal.md (README).
 -- Les deux comptes ci-dessous utilisent le meme mot de passe de demonstration.
 INSERT INTO utilisateur (login, mot_de_passe_hache, prenom, profil) VALUES
-    ('resp',  '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Florian',  'RESPONSABLE_EXPLOITATION'),
-    ('agent', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Alexandre',  'AGENT');
+    ('resp',  '$2a$10$i8MunbkeNsgJaBOMK0DcAeG/4gFgTCcI0NYbc32gOohCmpowhKKRm', 'Florian',  'RESPONSABLE_EXPLOITATION'),
+    ('agent', '$2a$10$i8MunbkeNsgJaBOMK0DcAeG/4gFgTCcI0NYbc32gOohCmpowhKKRm', 'Alexandre',  'AGENT');
