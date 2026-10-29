@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Statistiques')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Visualisation des données</h1>
+        <a class="btn btn-outline-secondary" th:href="@{/supervision}">Retour au tableau de bord</a>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6"><div class="card"><div class="card-body">
+            <h2 class="h6">Incidents actifs par station</h2>
+            <canvas id="grapheStations"></canvas>
+        </div></div></div>
+        <div class="col-md-6"><div class="card"><div class="card-body">
+            <h2 class="h6">Équipements par type</h2>
+            <canvas id="grapheTypes"></canvas>
+        </div></div></div>
+        <div class="col-md-6"><div class="card"><div class="card-body">
+            <h2 class="h6">Note moyenne par prestataire</h2>
+            <canvas id="graphePrestataires"></canvas>
+        </div></div></div>
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const stations = /*[[${incidentsParStation}]]*/ [];
+    const types = /*[[${equipementsParType}]]*/ [];
+    const prestataires = /*[[${notesPrestataires}]]*/ [];
+
+    function barres(idCanvas, donnees, libelle) {
+        const canvas = document.getElementById(idCanvas);
+        if (!canvas || donnees.length === 0) {
+            return;
+        }
+        new Chart(canvas, {
+            type: 'bar',
+            data: {
+                labels: donnees.map(d => d.label),
+                datasets: [{ label: libelle, data: donnees.map(d => d.valeur) }]
+            },
+            options: { scales: { y: { beginAtZero: true } } }
+        });
+    }
+
+    barres('grapheStations', stations, 'Incidents actifs');
+    barres('grapheTypes', types, 'Équipements');
+    barres('graphePrestataires', prestataires, 'Note moyenne');
+    /*]]>*/
+</script>
+</body>
+</html>
