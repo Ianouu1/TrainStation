@@ -51,3 +51,7 @@
 
 ### Fonctionnalité transverse 2 : Visualisation des données
 - **Objectif** : donner au responsable une vue synthétique de la situation.
+- **Progression** : requêtes d'agrégation ajoutées aux repositories, puis page de graphiques.
+- **Essais** : les données sont transmises aux graphiques par l'inlining JavaScript de Thymeleaf, ce qui évite un appel API supplémentaire.
+- **Résultat** : page `/supervision/statistiques` avec trois graphiques Chart.js : incidents actifs par station (requête native), équipements par type et note moyenne par prestataire (JPQL).
+- **Limites** : pas de choix de période d'analyse.

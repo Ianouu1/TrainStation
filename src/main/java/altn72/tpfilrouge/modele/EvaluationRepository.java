@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -21,4 +22,9 @@ public interface EvaluationRepository extends JpaRepository<Evaluation, Integer>
     @Query("select avg(ev.note) from Evaluation ev "
             + "where ev.incident.prestataire.idPrestataire = :idPrestataire")
     Double calculerNoteMoyennePrestataire(@Param("idPrestataire") Integer idPrestataire);
+
+    /** Note moyenne par prestataire (lot alpha, visualisation). Chaque ligne : [nom, moyenne]. */
+    @Query("select p.nom, avg(ev.note) from Evaluation ev "
+            + "join ev.incident.prestataire p group by p.nom order by p.nom")
+    List<Object[]> calculerNoteMoyenneParPrestataire();
 }
