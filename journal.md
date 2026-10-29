@@ -60,8 +60,11 @@ Correspondance avec les packages : couche web dans `controleur` (pages) et `api`
   Seul le responsable peut modifier un incident (F6), et uniquement sa description : l'équipement et la date d'ouverture restent figés pour garder un historique fiable.
 - **Exceptions** : `@ControllerAdvice` (pages web) et `@RestControllerAdvice` (API) plutôt que `ResponseStatusException`. La traduction des erreurs est centralisée, et les services ne lèvent que des exceptions métier en français, toutes dérivées d'`ExceptionMetier`, sans dépendre de HTTP. Une ressource inexistante donne un 404, une transition d'état interdite un 409. Les gestionnaires journalisent l'erreur (SLF4J) là où elle est traitée, et nulle part ailleurs. Une saisie invalide est rejetée dès l'entrée (Bean Validation) et réaffiche le formulaire avec son message ; une adresse invalide donne un 400. Les pages affichent un message lisible, sans trace technique ; une erreur imprévue n'affiche qu'un message générique. `ResponseEntity` n'est utilisé que dans l'API, pour choisir le code de statut.
 - **SOLID** :
-  - **S** (appliqué) : `EvaluateurUrgence` ne fait que calculer l'indicateur. Les seuils de 48 h et 72 h ne changent donc qu'à un seul endroit.
+  - **S** (appliqué) : contrôleurs, services et repositories ont chacun une seule responsabilité : les contrôleurs ne contiennent aucune règle métier et `EvaluateurUrgence` concentre le calcul de l'indicateur et de la durée d'ouverture. Les seuils de 48 h et 72 h ne changent donc qu'à un seul endroit.
   - **D** (appliqué) : injection par constructeur avec attributs `final`, et dépendance à une `Clock` injectée plutôt qu'à `LocalDateTime.now()`. Les tests figent l'horloge pour vérifier les seuils à l'heure près.
+  - **O** (écarté) : une seule règle de calcul d'urgence, aucune variante à rendre interchangeable.
+  - **L** (respecté sans être recherché) : la seule hiérarchie est celle des exceptions métier. Chaque sous-classe d'`ExceptionMetier` se contente d'un message et peut être traitée partout comme une `ExceptionMetier`, par exemple par la méthode `conflit` des gestionnaires d'erreurs.
+  - **I** (écarté) : les interfaces utilisées sont les repositories, déjà limitées à une entité chacun.
 - **Requête SQL native** : `IncidentRepository.compterIncidentsActifsParStation()` compte les incidents actifs par station. Elle reste lisible pour une agrégation sur trois tables, mais elle dépend des noms de colonnes et du dialecte SQL, n'est pas vérifiée au démarrage et renvoie un `Object[]` non typé. Une requête JPQL avec projection serait plus sûre à maintenir.
 - **@Transactional** : sur les méthodes de service qui écrivent (`declarerIncident`, `affecterPrestataire`, `resoudreIncident`, `modifierDescription`, `evaluer`), pour qu'une exception métier annule toute l'opération (RG10). Dans `ApiIncidentService`, pour garder la session ouverte pendant la conversion des entités en DTO : en `readOnly = true` pour la consultation, en écriture pour résoudre et affecter.
 
@@ -80,3 +83,15 @@ Correspondance avec les packages : couche web dans `controleur` (pages) et `api`
 - **Essais** : les données sont transmises aux graphiques par l'inlining JavaScript de Thymeleaf, ce qui évite un appel API supplémentaire.
 - **Résultat** : page `/supervision/statistiques` avec trois graphiques Chart.js : incidents actifs par station (requête native), équipements par type et note moyenne par prestataire (JPQL).
 - **Limites** : pas de choix de période d'analyse.
+
+## BILAN
+
+- **Contribution de chacun** :
+  - Alexandre GINISTY : entités Station et Équipement, repositories (requêtes dérivées, JPQL, native), script de base de données, exceptions métier, services du cycle de vie des incidents, de l'évaluation et de la supervision, connexion, mise en page commune et gestion des erreurs web, détail d'un incident, tableau de bord, API REST, visualisation (lot alpha 2), tests d'intégration et de validation.
+  - Florian DE SOUSA : nettoyage et configuration du projet, entités Incident, Prestataire, Évaluation et Utilisateur, calcul de l'indicateur d'urgence, services de consultation, sécurité (Spring Security, bcrypt, droits), pages stations, équipements, déclaration et évaluation, configuration Swagger, supervision avancée (lot alpha 1), tests unitaires des services.
+- **Plus grande difficulté** : les pages Thymeleaf affichent des associations chargées à la demande (station d'un équipement, prestataire d'un incident), ce qui provoquait des `LazyInitializationException` au rendu. Nous avons réactivé `open-in-view` pour garder la session ouverte pendant l'affichage, et utilisé des transactions en lecture seule pour l'API.
+- **Fonctionnalités non réalisées** : déploiement de l'application, faute d'hébergement choisi à ce stade.
+- **Trois points à retenir** :
+  1. Séparer contrôleur, service et repository rend chaque règle facile à trouver et à tester.
+  2. Injecter l'horloge permet de tester des règles qui dépendent du temps.
+  3. Une restriction d'accès doit être appliquée côté serveur : masquer un bouton ne protège rien.
