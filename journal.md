@@ -12,10 +12,35 @@
   - `resp` : Florian, Responsable d'exploitation.
   - `agent` : Alexandre, Agent.
 - **Données de démonstration** : trois stations, six équipements de types variés, incidents non affectés ouverts depuis 10 h, 47 h, 48 h, 72 h et 100 h (bornes de RG3), un incident affecté, deux incidents résolus et une évaluation. Les dates sont calculées par rapport à l'heure d'exécution du script.
+- **Limites connues** : application non déployée.
 
 ## ARCHITECTURE
 
 - **Dépôt** : https://github.com/Ianouu1/TrainStation
+- **Schéma** :
+
+```mermaid
+flowchart TB
+    N[Navigateur : pages HTML] -->|HTTP| S[Sécurité : Spring Security, session, profils, mots de passe hachés]
+    C[Client de l'API REST] -->|HTTP| S
+    S --> W[Couche web : @Controller Thymeleaf, @RestController API REST, DTO, validation @Valid, @ControllerAdvice]
+    W -->|appelle| SV[Couche service : règles métier, urgence, cycle de vie, évaluation]
+    W -->|Model| V[Vues Thymeleaf : templates, fragments]
+    V -.->|HTML| N
+    SV -->|appelle| R[Couche persistance : Spring Data JPA, requêtes dérivées, JPQL, 1 SQL natif]
+    R -->|JPA / SQL| DB[(MariaDB)]
+```
+
+Correspondance avec les packages : couche web dans `controleur` (pages) et `api` (REST), objets échangés dans `dto`, règles métier dans `service`, entités et repositories dans `modele`, exceptions métier dans `exception`, configuration (sécurité, horloge, OpenAPI) dans `config`.
+
+## TESTS
+
+- **Stratégie** : tests unitaires des règles métier, sans contexte Spring et avec une horloge figée ; tests d'intégration de la persistance et de la couche web sur une base H2 en mémoire.
+- **Commande** : `./mvnw verify` (35 tests, MariaDB non nécessaire).
+- **Tests unitaires** : `EvaluateurUrgenceTest`, `IncidentServiceTest`, `EvaluationServiceTest`, `SupervisionServiceTest`, `ValidationFormulairesTest`, `MotDePasseDemoTest`.
+- **Tests d'intégration** : `IncidentRepositoryTest` (`@DataJpaTest`), `PagesWebTest` et `IncidentApiControleurTest` (`@SpringBootTest` + MockMvc).
+- **Couvert** : seuils d'urgence à 47 h, 48 h, 71 h et 72 h (RG3), présentation distincte d'un incident affecté (RG4), réaffectation d'un incident résolu interdite (RG5), incidents résolus absents des actifs (RG6), historique du plus récent au plus ancien (RG7), règles d'évaluation (RG8), droits par profil (RG11), réponse 404 de l'API pour un incident inexistant (F12), validation des formulaires (description de 10 à 1000 caractères, note de 1 à 5), page d'erreur lisible pour une adresse invalide.
+- **Non couvert** : parcours complets dans un navigateur réel, que les tests MockMvc ne remplacent pas entièrement.
 
 ## CHOIX TECHNIQUES
 
