@@ -5,7 +5,7 @@ package altn72.trainstation.exception;
  * incident non résolu ou non affecté, incident déjà évalué, ou note hors de [1, 5].
  * Traduite en HTTP 409 (conflit) ou 400 (donnée invalide) selon le cas.
  */
-public class EvaluationInvalideException extends ExceptionMetier {
+public class EvaluationInvalideException extends MetierException {
 
     public EvaluationInvalideException(String message) {
         super(message);

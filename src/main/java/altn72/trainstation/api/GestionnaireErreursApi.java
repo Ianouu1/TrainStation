@@ -2,7 +2,7 @@ package altn72.trainstation.api;
 
 import altn72.trainstation.dto.MessageErreurDto;
 import altn72.trainstation.exception.EvaluationInvalideException;
-import altn72.trainstation.exception.ExceptionMetier;
+import altn72.trainstation.exception.MetierException;
 import altn72.trainstation.exception.RessourceIntrouvableException;
 import altn72.trainstation.exception.TransitionIncidentInterditeException;
 import org.slf4j.Logger;
@@ -30,7 +30,7 @@ public class GestionnaireErreursApi {
     }
 
     @ExceptionHandler({TransitionIncidentInterditeException.class, EvaluationInvalideException.class})
-    public ResponseEntity<MessageErreurDto> conflit(ExceptionMetier exception) {
+    public ResponseEntity<MessageErreurDto> conflit(MetierException exception) {
         log.warn("API, opération refusée : {}", exception.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new MessageErreurDto(exception.getMessage()));
     }

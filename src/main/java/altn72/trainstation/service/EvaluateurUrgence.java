@@ -19,10 +19,10 @@ import java.time.LocalDateTime;
 public class EvaluateurUrgence {
 
     /** Seuil (en heures) à partir duquel l'incident passe de vert à orange, 48 h incluses (RG3). */
-    public static final long SEUIL_ORANGE_EN_HEURES = 48L;
+    public static final long SEUIL_ORANGE_EN_HEURES = 48;
 
     /** Seuil (en heures) à partir duquel l'incident passe à rouge, 72 h incluses (RG3). */
-    public static final long SEUIL_ROUGE_EN_HEURES = 72L;
+    public static final long SEUIL_ROUGE_EN_HEURES = 72;
 
     private final Clock horloge;
 

@@ -32,7 +32,7 @@ public class ConfigurationSecurite {
         http
                 .authorizeHttpRequests(auth -> auth
                         // Ressources publiques et documentation de l'API.
-                        .requestMatchers("/connexion", "/css/**", "/js/**", "/webjars/**", "/favicon.ico").permitAll()
+                        .requestMatchers("/login", "/css/**", "/js/**", "/webjars/**", "/favicon.ico").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         // Tableau de bord de supervision : responsable d'exploitation uniquement (F11).
                         .requestMatchers("/supervision/**").hasRole(RESPONSABLE)
@@ -50,13 +50,13 @@ public class ConfigurationSecurite {
                         // Tout le reste exige une session authentifiée.
                         .anyRequest().authenticated())
                 .formLogin(form -> form
-                        .loginPage("/connexion")
+                        .loginPage("/login")
                         .defaultSuccessUrl("/", true)
-                        .failureUrl("/connexion?erreur")
+                        .failureUrl("/login?erreur")
                         .permitAll())
                 .logout(out -> out
                         .logoutUrl("/deconnexion")
-                        .logoutSuccessUrl("/connexion?deconnecte")
+                        .logoutSuccessUrl("/login?deconnecte")
                         .permitAll())
                 // Accès refusé (profil insuffisant) : page lisible plutôt qu'erreur technique (RG11, §7.4).
                 .exceptionHandling(ex -> ex.accessDeniedPage("/acces-refuse"))

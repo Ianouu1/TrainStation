@@ -1,7 +1,7 @@
 package altn72.trainstation.controleur;
 
 import altn72.trainstation.exception.EvaluationInvalideException;
-import altn72.trainstation.exception.ExceptionMetier;
+import altn72.trainstation.exception.MetierException;
 import altn72.trainstation.exception.RessourceIntrouvableException;
 import altn72.trainstation.exception.TransitionIncidentInterditeException;
 import org.slf4j.Logger;
@@ -35,7 +35,7 @@ public class GestionnaireErreursWeb {
 
     @ExceptionHandler({TransitionIncidentInterditeException.class, EvaluationInvalideException.class})
     @ResponseStatus(HttpStatus.CONFLICT)
-    public String conflit(ExceptionMetier exception, Model model) {
+    public String conflit(MetierException exception, Model model) {
         log.warn("Opération refusée : {}", exception.getMessage());
         model.addAttribute("message", exception.getMessage());
         return VUE_ERREUR;

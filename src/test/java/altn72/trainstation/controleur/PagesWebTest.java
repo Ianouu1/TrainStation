@@ -24,7 +24,7 @@ class PagesWebTest {
 
     @Test
     void pageDeConnexionEstPublique() throws Exception {
-        mockMvc.perform(get("/connexion")).andExpect(status().isOk());
+        mockMvc.perform(get("/login")).andExpect(status().isOk());
     }
 
     @Test

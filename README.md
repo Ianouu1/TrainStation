@@ -83,7 +83,7 @@ POST /api/incidents/{id}/resolution      résoudre (responsable, 409 si déjà r
 ```
 
 Les erreurs passent par un `@RestControllerAdvice` qui traduit les exceptions métier (toutes dérivées
-d'`ExceptionMetier`, messages en français) en 400, 404 ou 409. Côté pages, un `@ControllerAdvice`
+de `MetierException`, messages en français) en 400, 404 ou 409. Côté pages, un `@ControllerAdvice`
 affiche un message lisible, sans trace technique.
 
 ## Ce qui se passe sous le capot

@@ -7,13 +7,13 @@ package altn72.trainstation.exception;
  * déclenche alors un rollback automatique. Chaque sous-classe porte un message
  * clair, en français, et conserve si besoin la cause d'origine.</p>
  */
-public abstract class ExceptionMetier extends RuntimeException {
+public abstract class MetierException extends RuntimeException {
 
-    protected ExceptionMetier(String message) {
+    protected MetierException(String message) {
         super(message);
     }
 
-    protected ExceptionMetier(String message, Throwable cause) {
+    protected MetierException(String message, Throwable cause) {
         super(message, cause);
     }
 }

@@ -5,7 +5,7 @@ package altn72.trainstation.exception;
  * (par ex. affecter ou réaffecter un incident déjà résolu, RG5).
  * Traduite en HTTP 409 (conflit).
  */
-public class TransitionIncidentInterditeException extends ExceptionMetier {
+public class TransitionIncidentInterditeException extends MetierException {
 
     public TransitionIncidentInterditeException(String message) {
         super(message);
