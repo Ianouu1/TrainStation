@@ -37,9 +37,9 @@ Correspondance avec les packages : couche web dans `controleur` (pages) et `api`
 ## TESTS
 
 - **Stratégie** : tests unitaires des règles métier, sans contexte Spring et avec une horloge figée ; tests d'intégration de la persistance et de la couche web sur une base H2 en mémoire.
-- **Commande** : `./mvnw verify` (35 tests, MariaDB non nécessaire).
+- **Commande** : `./mvnw verify` (49 tests, MariaDB non nécessaire).
 - **Tests unitaires** : `EvaluateurUrgenceTest`, `IncidentServiceTest`, `EvaluationServiceTest`, `SupervisionServiceTest`, `ValidationFormulairesTest`, `MotDePasseDemoTest`.
-- **Tests d'intégration** : `IncidentRepositoryTest` (`@DataJpaTest`), `PagesWebTest` et `IncidentApiControleurTest` (`@SpringBootTest` + MockMvc).
+- **Tests d'intégration** : `IncidentRepositoryTest` et `EvaluateurFragiliteTest` (`@DataJpaTest`), `PagesWebTest`, `EquipementFragileWebTest` et `IncidentApiControleurTest` (`@SpringBootTest` + MockMvc).
 - **Couvert** : seuils d'urgence à 47 h, 48 h, 71 h et 72 h (RG3), présentation distincte d'un incident affecté (RG4), réaffectation d'un incident résolu interdite (RG5), incidents résolus absents des actifs (RG6), historique du plus récent au plus ancien (RG7), règles d'évaluation (RG8), droits par profil (RG11), réponse 404 de l'API pour un incident inexistant (F12), validation des formulaires (description de 10 à 1000 caractères, note de 1 à 5), page d'erreur lisible pour une adresse invalide.
 - **Non couvert** : parcours complets dans un navigateur réel, que les tests MockMvc ne remplacent pas entièrement.
 
@@ -96,3 +96,34 @@ Correspondance avec les packages : couche web dans `controleur` (pages) et `api`
   1. Séparer contrôleur, service et repository rend chaque règle facile à trouver et à tester.
   2. Injecter l'horloge permet de tester des règles qui dépendent du temps.
   3. Une restriction d'accès doit être appliquée côté serveur : masquer un bouton ne protège rien.
+
+## Évolution séance finale
+
+### Description de l'évolution
+
+Évolution « Équipement fragile » : un équipement est fragile lorsqu'il a eu au moins 3 incidents ouverts durant les 30 derniers jours, quel que soit leur statut (EF1 à EF3).
+
+- **Règle métier** : `service/EvaluateurFragilite.java`. Le seuil (`SEUIL_INCIDENTS_FRAGILITE = 3`) et la fenêtre (`FENETRE_FRAGILITE_EN_JOURS = 30`) y sont définis une seule fois (EF5). Méthodes `estFragile`, `compterIncidentsDansLaFenetre` et `listerEquipementsFragiles`.
+- **Persistance** : `modele/IncidentRepository.java`, deux requêtes ajoutées : un comptage dérivé (`countByEquipement_IdEquipementAndDateOuvertureGreaterThanEqual`) et une requête JPQL `group by ... having count(i) >= :seuil` qui renvoie d'un coup les équipements fragiles.
+- **Fiche équipement** : `controleur/EquipementControleur.java` transmet `equipementFragile` à `templates/equipements/detail.html`, qui affiche le badge « Équipement fragile » si et seulement si l'équipement est fragile.
+- **Tableau de bord** : `service/SupervisionService.java` marque chaque ligne (`dto/LigneSupervisionDto.java`, champ `equipementFragile`) ; `templates/supervision/tableauDeBord.html` affiche le même badge à côté de l'équipement.
+- **Déclaration** : après `IncidentService.declarerIncident`, `EquipementControleur` interroge `EvaluateurFragilite` et place un message flash, affiché sur la fiche équipement ; il contient le mot « fragile » quand l'équipement l'est devenu.
+
+### Choix de conception
+
+- **Une classe dédiée**, sur le modèle d'`EvaluateurUrgence` : la règle a une seule raison de changer et se teste isolément (responsabilité unique). Les contrôleurs et les vues n'appliquent aucune règle, ils affichent un booléen calculé par le service (EF6).
+- **Rien n'est stocké** : la fenêtre est calculée à chaque consultation, `LocalDateTime.now(horloge) - 30 jours`, avec l'horloge injectée (`ConfigurationHorloge`) déjà utilisée pour RG3 (EF4). La borne est incluse (`>=`), comme l'exige EF1.
+- **Comptage en base** plutôt qu'en mémoire : la base ne renvoie qu'un nombre ou une liste d'identifiants, au lieu de charger tous les incidents.
+- **Une seule requête pour le tableau de bord** : les identifiants des équipements fragiles sont obtenus une fois, puis chaque ligne est marquée en mémoire. On évite ainsi un comptage par incident actif (problème N+1).
+- **Raccourci pris** : le texte du message de confirmation est construit dans le contrôleur. C'est du texte d'interface, pas une règle : la décision « fragile ou non » reste dans le service. Le seuil n'apparaît pas dans le message, pour ne pas le dupliquer (EF5).
+
+### Tests ajoutés et limites connues
+
+- `EvaluateurFragiliteTest` (`@DataJpaTest`, horloge figée, 8 tests) : les 7 cas limites de l'énoncé (2 incidents, 3 incidents, 3 dont 1 résolu, 30 j et 1 min non compté, 29 j 23 h 59 compté, 2 récents + 5 vieux de 45 jours, voisin non contaminé), plus la borne exacte de 30 jours, comptée.
+- `SupervisionServiceTest` : un test ajouté, seuls les incidents d'un équipement fragile portent le badge, y compris un incident affecté.
+- `EquipementFragileWebTest` (`@SpringBootTest` + MockMvc, 5 tests) : badge présent ou absent sur la fiche selon l'équipement, badge sur le tableau de bord, mot « fragile » présent ou absent dans le message de confirmation.
+- **Limites connues** :
+  - les tests web utilisent l'horloge réelle : un test lancé exactement à une borne de fenêtre pourrait en théorie basculer (les données sont placées à 1, 2 et 3 jours, loin des bornes) ;
+  - la fenêtre suit le fuseau de l'horloge système, comme les dates d'ouverture enregistrées ; un changement d'heure peut décaler la borne d'une heure ;
+  - le badge n'apparaît que sur la fiche équipement et le tableau de bord, pas sur la liste des équipements d'une station ni dans l'API REST ;
+  - un incident dont la date d'ouverture serait dans le futur serait compté.
