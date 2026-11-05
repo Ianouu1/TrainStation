@@ -4,6 +4,8 @@
 <body>
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
 <main class="container">
+    <div th:if="${messageConfirmation}" class="alert alert-success" role="status"
+         th:text="${messageConfirmation}">Incident déclaré.</div>
     <div class="d-flex align-items-center gap-2 mb-3">
         <h1 class="h3 mb-0" th:text="${equipement.libelle}">Équipement</h1>
         <span th:if="${equipementFragile}" class="badge bg-danger">Équipement fragile</span>
