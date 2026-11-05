@@ -18,6 +18,7 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -29,18 +30,20 @@ class SupervisionServiceTest {
     private static final LocalDateTime MAINTENANT = LocalDateTime.of(2026, 10, 14, 15, 0);
 
     @Mock private IncidentService incidentService;
+    @Mock private EvaluateurFragilite evaluateurFragilite;
     private SupervisionService supervisionService;
 
     @BeforeEach
     void preparer() {
         Clock horloge = Clock.fixed(MAINTENANT.atZone(ZONE).toInstant(), ZONE);
-        supervisionService = new SupervisionService(incidentService, new EvaluateurUrgence(horloge));
+        supervisionService = new SupervisionService(incidentService, new EvaluateurUrgence(horloge), evaluateurFragilite);
     }
 
     private Incident incident(int idStation, String nomStation, long heures, StatutIncident statut) {
         Station station = new Station(nomStation);
         station.setIdStation(idStation);
         Equipement equipement = new Equipement("REF-" + idStation, "Eq", "TYPE", EtatEquipement.EN_PANNE, station);
+        equipement.setIdEquipement(idStation);
         Incident incident = new Incident(equipement, "Panne", MAINTENANT.minusHours(heures));
         incident.setStatut(statut);
         return incident;
@@ -88,5 +91,24 @@ class SupervisionServiceTest {
 
         assertThat(lignes).hasSize(1);
         assertThat(lignes.get(0).incident().getEquipement().getStation().getNom()).isEqualTo("B");
+    }
+
+    @Test
+    void seulsLesIncidentsDunEquipementFragilePortentLeBadge() {
+        when(evaluateurFragilite.listerEquipementsFragiles()).thenReturn(Set.of(1));
+        when(incidentService.listerIncidentsActifs()).thenReturn(List.of(
+                incident(1, "A", 10, StatutIncident.NON_AFFECTE),
+                incident(1, "A", 60, StatutIncident.AFFECTE),
+                incident(2, "B", 10, StatutIncident.NON_AFFECTE)));
+
+        List<LigneSupervisionDto> lignes = supervisionService.construireTableauDeBord(
+                new CritereSupervisionForm(null, null, "ANCIENNETE"));
+
+        assertThat(lignes).filteredOn(LigneSupervisionDto::equipementFragile)
+                .extracting(ligne -> ligne.incident().getEquipement().getStation().getNom())
+                .containsExactly("A", "A");
+        assertThat(lignes).filteredOn(ligne -> !ligne.equipementFragile())
+                .extracting(ligne -> ligne.incident().getEquipement().getStation().getNom())
+                .containsExactly("B");
     }
 }
