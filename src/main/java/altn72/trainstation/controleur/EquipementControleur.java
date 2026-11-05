@@ -3,6 +3,7 @@ package altn72.trainstation.controleur;
 import altn72.trainstation.dto.DescriptionIncidentForm;
 import altn72.trainstation.modele.Equipement;
 import altn72.trainstation.service.EquipementService;
+import altn72.trainstation.service.EvaluateurFragilite;
 import altn72.trainstation.service.IncidentService;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
@@ -21,17 +22,22 @@ public class EquipementControleur {
 
     private final EquipementService equipementService;
     private final IncidentService incidentService;
+    private final EvaluateurFragilite evaluateurFragilite;
 
-    public EquipementControleur(EquipementService equipementService, IncidentService incidentService) {
+    public EquipementControleur(EquipementService equipementService,
+                                IncidentService incidentService,
+                                EvaluateurFragilite evaluateurFragilite) {
         this.equipementService = equipementService;
         this.incidentService = incidentService;
+        this.evaluateurFragilite = evaluateurFragilite;
     }
 
-    /** Fiche équipement avec la liste de ses incidents (F3). */
+    /** Fiche équipement avec la liste de ses incidents (F3) et le badge « Équipement fragile ». */
     @GetMapping("/equipements/{id}")
     public String afficherEquipement(@PathVariable("id") Integer idEquipement, Model model) {
         model.addAttribute("equipement", equipementService.obtenirEquipement(idEquipement));
         model.addAttribute("incidents", equipementService.listerIncidentsDeEquipement(idEquipement));
+        model.addAttribute("equipementFragile", evaluateurFragilite.estFragile(idEquipement));
         return "equipements/detail";
     }
 
