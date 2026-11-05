@@ -82,7 +82,10 @@
             </td>
             <td th:text="${#temporals.format(ligne.incident().dateOuverture, 'dd/MM/yyyy HH:mm')}">date</td>
             <td th:text="${ligne.incident().equipement.station.nom}">station</td>
-            <td th:text="${ligne.incident().equipement.libelle}">équipement</td>
+            <td>
+                <span th:text="${ligne.incident().equipement.libelle}">équipement</span>
+                <span th:if="${ligne.equipementFragile()}" class="badge bg-danger ms-1">Équipement fragile</span>
+            </td>
             <td th:text="${ligne.incident().description}">description</td>
             <td>
                 <a class="btn btn-info btn-sm"

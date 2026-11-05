@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Construit la vue du tableau de bord de supervision (F11).
@@ -17,17 +18,22 @@ import java.util.List;
  * <p>Chaque incident actif est enrichi de son indicateur d'attention : vert,
  * orange ou rouge pour un incident non affecté (RG3), rien pour un incident
  * affecté, qui reçoit une présentation distincte (RG4). Les incidents résolus
- * n'y figurent pas (RG6).</p>
+ * n'y figurent pas (RG6). Chaque ligne indique aussi si son équipement est
+ * fragile (EF3), d'après une seule requête pour toute la page.</p>
  */
 @Service
 public class SupervisionService {
 
     private final IncidentService incidentService;
     private final EvaluateurUrgence evaluateurUrgence;
+    private final EvaluateurFragilite evaluateurFragilite;
 
-    public SupervisionService(IncidentService incidentService, EvaluateurUrgence evaluateurUrgence) {
+    public SupervisionService(IncidentService incidentService,
+                              EvaluateurUrgence evaluateurUrgence,
+                              EvaluateurFragilite evaluateurFragilite) {
         this.incidentService = incidentService;
         this.evaluateurUrgence = evaluateurUrgence;
+        this.evaluateurFragilite = evaluateurFragilite;
     }
 
 
@@ -36,8 +42,9 @@ public class SupervisionService {
      * Le filtrage par niveau se fait en mémoire car l'indicateur est calculé, non persisté (RG4).
      */
     public List<LigneSupervisionDto> construireTableauDeBord(CritereSupervisionForm critere) {
+        Set<Integer> equipementsFragiles = evaluateurFragilite.listerEquipementsFragiles();
         return incidentService.listerIncidentsActifs().stream()
-                .map(this::superviser)
+                .map(incident -> superviser(incident, equipementsFragiles))
                 .filter(ligne -> estDeLaStation(ligne, critere.idStation()))
                 .filter(ligne -> aLeNiveauDemande(ligne, critere))
                 .sorted(choisirOrdre(critere))
@@ -90,11 +97,13 @@ public class SupervisionService {
                 lignes.size(), lignes.size() - affectes, affectes, verts, oranges, rouges);
     }
 
-    private LigneSupervisionDto superviser(Incident incident) {
+    private LigneSupervisionDto superviser(Incident incident, Set<Integer> equipementsFragiles) {
+        boolean equipementFragile = equipementsFragiles.contains(incident.getEquipement().getIdEquipement());
         if (incident.getStatut() == StatutIncident.AFFECTE) {
-            return new LigneSupervisionDto(incident, null);
+            return new LigneSupervisionDto(incident, null, equipementFragile);
         }
-        return new LigneSupervisionDto(incident, evaluateurUrgence.evaluer(incident.getDateOuverture()));
+        return new LigneSupervisionDto(
+                incident, evaluateurUrgence.evaluer(incident.getDateOuverture()), equipementFragile);
     }
 
     private long compter(List<LigneSupervisionDto> lignes, NiveauUrgence niveau) {

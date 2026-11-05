@@ -10,8 +10,11 @@ import altn72.trainstation.modele.NiveauUrgence;
  * vert/orange/rouge (RG3). Pour un incident affecté, il vaut {@code null} :
  * l'incident reçoit une présentation distincte et ne porte aucun de ces
  * indicateurs (RG4).</p>
+ *
+ * <p>{@code equipementFragile} indique si l'équipement de l'incident est fragile
+ * à l'instant de la consultation (évolution « Équipement fragile », EF3).</p>
  */
-public record LigneSupervisionDto(Incident incident, NiveauUrgence niveauUrgence) {
+public record LigneSupervisionDto(Incident incident, NiveauUrgence niveauUrgence, boolean equipementFragile) {
 
     public boolean estAffecte() {
         return niveauUrgence == null;
